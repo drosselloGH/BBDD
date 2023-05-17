@@ -57,7 +57,7 @@ CALL getQtyProductsStatus("Shipped", @total);
 SELECT @total;
 
 -- ¿Qué tipo de variable es @total?
--- Es una variable de sesión
+-- Es una variable de sesión. Sólo se usa al abrir sesión
 
 -- Llama al procedimiento para obtener el número de pedidos en estado 'Canceled'
 CALL getQtyProductsStatus("Cancelled", @total);
@@ -68,18 +68,31 @@ select @total;
 -- Crea un procedimiento que tenga una parámetro de entrada/salida que incremente un contador
 -- con el valor que se le pase como parámetro de entrada
 delimiter $$
-create procedure contadorPrueba (inout contador integer)
-begin
-set contador =+ contador;
-end$$
+create procedure contador(inout cont Integer, in incr integer)
+BEGIN
+set cont = cont + incr;
+END $$
 delimiter ;
--- Llama al procedimiento setCounter para que le pasemos un contador con valor 1 y lo incremente en 1
 
+-- Llama al procedimiento contador para que le pasemos un contador con valor 1 y lo incremente en 1
+set @contador = 1;
+call contador(@contador, 1);
+select @contador;
 
 -- Llama al procedimiento setCounter para que al valor anterior lo incremente en 1
-
+call contador(@contador, 1);
+select @contador;
 
 -- Llama al procedimiento setCounter para que al valor anterior lo incremente en 5
+call contador(@contador, 5);
+select @contador;
 
+set @contador = 0;
+-- se resetea el valor de la variable
 
 -- ¿Qué se ha visto en este tutorial?
+-- parametros de entrada/salida(INOUT)
+-- parametros de entrada(IN)
+-- parametros de salida(OUT)
+-- llamar a un procedimiento con parámetros
+
