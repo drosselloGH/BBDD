@@ -12,6 +12,7 @@ DELIMITER $$
 CREATE PROCEDURE getTotalOrder()
 BEGIN
 DECLARE total, totalIncr integer default 0;
+-- recomendable usar el default
 
 SELECT COUNT(*) into total FROM orders;
 
