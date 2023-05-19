@@ -83,13 +83,15 @@ DELIMITER ;
 
 
 -- Obtener el tiempo de envío para el cliente 103.
+call getCustomerShipping(103, @shipping);
+select @shipping;
 
 
 -- ¿Qué respuesta devuelve el output en este caso?
-
+-- 1 row(s) returned
 
 -- ¿Qué valor tiene la variable @shipping?
-
+select @shipping;
 
 /* SEARCHED CASE STATEMENT */
 /* Crea un procedimiento llamado getDeliveryStatus que devuelva el estado de entrega de un pedido. Los estados de entrega serán:
@@ -101,7 +103,25 @@ DELIMITER ;
     (requiredDate).
 */
 
+select datediff(requiredDate, shippedDate) dias from orders;
+
+DELIMITER $$
+create procedure getDeliveryStatus(in pedido integer, out estadoEntrega varchar(20))
+BEGIN
+declare diasPasados integer default 0; 
+select datediff(requiredDate, shippedDate) dias into diasPasados from orders where orderNumber = pedido;
+case 
+	when diasPasados = 0 then set estadoEntrega = "On time";
+    when diasPasados >= 1 and diasPasados <= 5 then set estadoEntrega = "Late";
+    when diasPasados > 5 then set estadoEntrega = "Very late";
+    else set estadoEntrega = "No information";
+end case;
+END$$
+
+DELIMITER ;
+
+drop procedure getDeliveryStatus;
 
 -- Muestra el estado de envío del pedido 10100
-
-
+call getDeliveryStatus(10100, @estadoEntrega);
+select @estadoEntrega;
