@@ -94,12 +94,35 @@ select @nivel;
         - 'GOLD', si el crédito del cliente está entre 10000 y 50000 (sólo el 50000 incluido),
         - 'SILVER', para el resto de casos
 */
+drop procedure getCustomerLevel;
 
+DELIMITER $$
+CREATE PROCEDURE getCustomerLevel(in cliente integer, out level varchar(15))
+BEGIN
+declare credito decimal(10, 2) default 0.0;
+SELECT creditLimit into credito from customers where customerNumber = cliente;
+
+IF credito > 50000 THEN
+	set level = "PLATINUM";
+
+ELSEIF credito > 10000 and credito <= 50000 THEN
+	set level = "GOLD";
+
+ELSE
+	set level = "SILVER";
+END IF;
+
+END $$
+DELIMITER ;
 
 -- Utiliza el procedimiento getCustomerLevel para comprobar el nivel de crédito del cliente 141
-
+call getCustomerLevel(141, @level);
+select @level;
 
 -- Utiliza el procedimiento getCustomerLevel para comprobar el nivel de crédito del cliente 447
-
+call getCustomerLevel(447, @level);
+select @level;
 
 -- Utiliza el procedimiento getCustomerLevel para comprobar el nivel de crédito del cliente 125
+call getCustomerLevel(125, @level);
+select @level;
