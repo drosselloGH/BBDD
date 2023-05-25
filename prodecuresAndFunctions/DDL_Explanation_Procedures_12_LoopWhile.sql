@@ -36,16 +36,26 @@ calendars ha de utilizarse el procedimiento insertCalendar.
 NOTA. Para incrementar fecha puedes utilizar la función ADD_DATE
 */
 DELIMITER $$
-create procedure loadCalendars(in fecha date, in cantFechas integer)
+create procedure loadCalendars(in fecha date, in numDias integer)
 BEGIN
+declare contador integer default 0;
 
-select date_add(insertCalendar(fecha), interval cantFechas day);
-
+	while (contador < numDias) do
+		-- insertamos la fecha
+		call insertCalendar(fecha);
+        -- añade un dia a fecha
+        set fecha = date_add(fecha, interval 1 day);
+        -- sumamos +1 al contador
+        set contador = contador +1;
+	end while;
+    
 END $$
 DELIMITER ;
 
+drop procedure loadCalendars;
 
 -- Inserta 10 días en la tabla calendars desde 01-01-2023
-
+call loadCalendars('2023-01-01', 10);
 
 -- Muestra los valores de la tabla calendars
+select * from calendars;
