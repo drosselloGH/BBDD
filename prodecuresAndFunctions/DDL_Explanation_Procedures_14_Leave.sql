@@ -47,6 +47,8 @@ CREATE PROCEDURE leaveDemo(out numeros varchar(50))
 BEGIN
 	declare numMax integer default 0;
 	declare contador integer default 1;
+    -- 0.5 * (max - min) + min
+    -- FLOOR() redondea hacia abajo
     set numMax = FLOOR(rand()*10-4)+4;
     set numeros = "";
     iteraciones:LOOP
