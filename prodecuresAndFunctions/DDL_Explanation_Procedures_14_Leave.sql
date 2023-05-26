@@ -42,10 +42,32 @@ call checkCustomer(100);
 -- Crea un procedimiento que se llame leaveDemo que devuelva una cadena de caracteres desde el 1
 -- hasta un número aleatorio entre el 4 y el 10. Utiliza la sentencia LOOP para hacer este ejecicio
 -- NOTA. Utiliza las funciones FLOOP y RAND para poder obtener el límite superior de la cadena de caracteres.
+DELIMITER $$
+CREATE PROCEDURE leaveDemo(out numeros varchar(50))
+BEGIN
+	declare numMax integer default 0;
+	declare contador integer default 1;
+    set numMax = FLOOR(rand()*10-4)+4;
+    set numeros = "";
+    iteraciones:LOOP
+		if(contador = 1) then
+			set numeros = concat(numeros, contador);
+		else 
+			set numeros = concat(numeros, ", ",contador);
+		end if;
+		if(contador = numMax) then
+			leave iteraciones;
+		end if;
+		set contador = contador +1;
+	end loop;
+END $$
+DELIMITER ;
 
+drop procedure leaveDemo;
 
 -- Llama al procedimiento leaveDemo varias veces y comprueba que cada vez da un límite superior
-
+call leaveDemo(@numeros);
+select @numeros;
 
 -- ¿En qué bucles se puede utilizar la sentencia LEAVE?
 -- En LOOP, WHILE y REPEAT
