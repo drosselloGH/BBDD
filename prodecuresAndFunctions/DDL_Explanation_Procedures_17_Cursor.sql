@@ -17,35 +17,30 @@ select email from employees;
 DELIMITER $$
 CREATE PROCEDURE createEmailList(out listado varchar(4000))
 BEGIN
+-- aqui metemos cada correo, temporalmente
 declare correo varchar(255) default "";
 -- fin de la tabla
 declare finished integer default 0;
 
 -- este cursor apunta a los emails
-declare cur_Email cursor for 
-	select email from employees;
-    
+declare cur_Email cursor for select email from employees;
+
 -- manejador: cuando encuentre not fount, haga que finished = 1
 declare continue handler for not found set finished = 1;
-    
 	set listado = "";
-    
+    -- abrimos el cursor
     open cur_Email;
-    
     bucleListado: loop
 		fetch cur_Email into correo;
 		set listado = concat(correo, ';', listado);
-		
 		if(finished = 1) then
 			leave bucleListado;
 		end if;
-		
 	end loop;
     close cur_Email;
-    
+select listado;
 END $$
 DELIMITER ;
-
 
 -- Crea la lista de email utilizando el procedimiento createEmailList
 call createEmailList(@listado);

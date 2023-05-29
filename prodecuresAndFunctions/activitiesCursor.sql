@@ -3,57 +3,57 @@ create schema if not exists test;
 
 use test;
 
-create table alumnos(
-id integer primary key,
+create table alumno(
+id integer unsigned primary key,
 name varchar(50) not null ,
 surname1 varchar(50) not null,
 surname2 varchar(50),
 dateOfBirth date not null
 );
 
-alter table alumnos
-add column age integer not null;
-
-alter table alumnos drop column age;
-
-insert into alumnos(id, name, surname1, surname2, dateOfBirth)
+insert into alumno(id, name, surname1, surname2, dateOfBirth)
 VALUES(1, "Pepe", "Mayol", "Ramis", "2001-01-02"), 
 (2, "Si", "Adios", "Ahola", "2011-03-01"),
 (3, "jkabfñaf", "Ayuda", "apellido", "2003-11-23"),
-(4, "Pepa", "Maagfaf", "ahbfasf", "2001-10-31"),
-(5, "No", "hola", "saludos", "2000-04-18");
+(4, "Pepa", "Maagfaf", "ahbfasf", "2001-10-31");
 
 select * from alumnos;
 
+alter table alumnos add column edad integer;
+
 DELIMITER $$
-CREATE PROCEDURE calcular_edad(in fecha date, out edades varchar(100))
-BEGIN
-
-declare edad varchar(10) default "";
-
-declare finished integer default 0;
-
--- declaramos el cursor
-declare cur_Edades cursor for 
-	select age from alumnos;
-    
--- manejador: cuando encuentre not fount, haga que finished = 1
-declare continue handler for not found set finished = 1;
-
-set edades = "";
-
-open cur_Edades;
-
-	bucleListado: loop
-		fetch  cur_Edades into edad;
-		set edades = concat();
-		
-		if(finished = 1) then
-			leave bucleListado;
-		end if;
-		
-	end loop;
-	
-    
-END $$
+CREATE PROCEDURE calcular_edad(in fecha date, out numAnyos integer)
+	BEGIN
+		-- diferencia de años entre una fecha y otra, 
+        -- 1r como queremos que nos devuelva el valor de la restar (month, year, day...)
+		set numAnyos = timestampdiff(year, fecha, curdate());
+	END $$
 DELIMITER ;
+
+drop procedure calcular_edad;
+call calcular_edad('2005-05-30', @edad); 
+select @edad;
+
+/*parte 2*/
+delimiter $$
+create procedure actualizar_columna_edad()
+	begin
+        declare var_fecha date;
+        declare finalizado integer default 0;
+        -- cursor
+		declare alumno cursor for select dateOfBirth from alumnos;
+        declare continue handler for not found set finalizado = 1;
+			open alumno;
+				bucle: loop
+					fetch alumno into var_id, var_fecha;
+						if(finalizado = 1) then
+							leave bucle;
+						end if;
+                        call calcular_edad(var_fecha, @edad);
+                        update alumno set edad = @edad where id = var_id;
+				end loop;
+            close alumno;
+	end $$
+delimiter ;
+
+call actualizar_columna_edad();
