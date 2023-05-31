@@ -1,49 +1,65 @@
-/*ejer 2*/
-alter table alumno add column email varchar(255);
+/* CURSORES EJ2 */
+USE test;
+ALTER TABLE alumno add column email varchar(255);
 
-drop procedure crear_email;
+DROP PROCEDURE crear_email;
 
-delimiter $$
-create procedure crear_email(in nombre varchar(259), in apellido1 varchar(50), in apellido2 varchar(50), in dominio varchar(50), out email varchar(255))
-	begin
-		-- separa las columnas (nombre, desde donde empezar, donde acabar)
-		set email = concat(substring(nombre, 1, 1), substring(apellido1, 1, 3), substring(apellido2, 1, 3), "@", dominio);
-	end $$
-delimiter ;
+DELIMITER $$
+CREATE PROCEDURE crear_email(
+	IN nombre VARCHAR(25),
+    IN apellido1 VARCHAR(50),
+    IN apellido2 VARCHAR(50),
+    IN dominio VARCHAR(50),
+    OUT email VARCHAR(255)
+)
+BEGIN
+	SET email = CONCAT(substring(nombre,1,1), substring(apellido1,1,3), substring(apellido2,1,3),'@',dominio);
+END$$
 
-call crear_email('Daniel', "Rosselló", "Oliver", "jkabfñkaf", @email);
+DELIMITER ;
 
-select @email;
+call crear_email('Belen', 'Laserna', 'Belenguer', 'iessonferrer.net', @email);
 
-delimiter $$
-create procedure actualizar_columna_email()
-	begin
-		declare var_email varchar(255) default "";
-        declare var_id integer default 0;
-        declare var_nombres varchar(50) default "";
-        declare var_apellido1 varchar(50) default "";
-        declare var_apellido2 varchar(50) default "";
-        declare finalizado integer default 0;
+DROP PROCEDURE actualizar_columna_email;
+
+DELIMITER $$
+CREATE PROCEDURE actualizar_columna_email()
+BEGIN
+	DECLARE var_email VARCHAR(255) DEFAULT '';
+    DECLARE var_id INTEGER DEFAULT 0;
+    DECLARE var_nombres VARCHAR(50) DEFAULT '';
+    DECLARE var_apellido1 VARCHAR(70) DEFAULT '';
+    DECLARE var_apellido2 VARCHAR(70) DEFAULT '';
+    DECLARE finalizada INTEGER DEFAULT 0;
+    
+    DECLARE cur_alumnos CURSOR FOR
+		SELECT id, nombre, apellido1, apellido1 FROM alumno;
         
-        declare cur_alumnos cursor for select id, nombre, apellido1, apellido2 from alumno;
+	DECLARE CONTINUE HANDLER FOR NOT FOUND 
+		SET finalizada = 1;
         
-        declare continue handler for not found set finalizado = 1;
+	OPEN cur_alumnos;
+		
+	bucle: LOOP
+		FETCH cur_alumnos INTO var_id, var_nombres, var_apellido1, var_apellido2;
         
-        open cur_alumnos;
-			bucle: loop
-				fetch cur_alumnos into var_id, var_nombre, var_apellido1, var_apellido2;
-                
-                if (finalizado = 1) then
-					leave bucle;
-				end if;
-                
-                call crear_email(var_nombre, var_apellido1, var_apellido2, "bfbafafb.com", var_email);
-                
-                insert into alumnos(id, email) values (var_id, var_email) on duplicate key update id = var_id, email = var_email;
-			end loop;
-                
-                
-                
-        close cur_alumnos;
-	end $$
-delimiter ;
+        IF (finalizada = 1) THEN
+			LEAVE bucle;
+		END IF;
+        
+        CALL crear_email(var_nombres, var_apellido1, var_apellido2, 'iessonferrer.net', var_email);
+        
+        INSERT INTO alumno(id, email)
+		VALUES 	(var_id, var_email) ON DUPLICATE KEY UPDATE id=var_id, email=var_email;
+	END LOOP;
+    
+    CLOSE cur_alumnos;
+END$$
+
+DELIMITER ;
+
+CALL actualizar_columna_email();
+SELECT 
+    *
+FROM
+    alumno;
